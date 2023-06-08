@@ -1,22 +1,80 @@
 use image::{
+	ImageBuffer,
 	Rgba,
 };
 
+use crate::util;
+
 pub enum Fractal {
 	Mandelbrot,
+	Sierpinski,
+	Custom,
 }
 
-pub fn render(fractal: Fractal, x: u32, y: u32) -> Rgba<u8> {
+pub fn render(buf: &mut util::RgbaBuffer, fractal: &Fractal, width: u32, height: u32) -> Result<(), image::ImageError> {
 	match fractal {
-		Fractal::Mandelbrot => render_mandelbrot(x, y)
+		Fractal::Mandelbrot => render_mandelbrot(buf, width, height),
+		Fractal::Sierpinski => render_sierpinski(buf, width, height),
+		Fractal::Custom => render_custom(buf, width, height),
 	}
 }
 
-fn render_mandelbrot(x: u32, y: u32) -> Rgba<u8> {
-	let r = (0.3 * x as f32) as u8;
-	let g = 0 as u8;
-    let b = (0.3 * y as f32) as u8;
-	let a = x as u8;
+fn render_mandelbrot(buf: &mut util::RgbaBuffer, width: u32, height: u32) -> Result<(), image::ImageError> {
+	for (x, y, pixel) in buf.enumerate_pixels_mut() {
 
-	Rgba([r, g, b, a])
+		// determines field/location of view
+		let c = num::Complex::new(
+			(x as f64 * 3.0) / (width as f64) - 2.0,
+			(y as f64 * 3.0) / (height as f64) - 1.5,
+		);
+		// "seed"
+		let mut z = num::Complex::new(0.0, 0.0);
+
+		// escape time function
+		let mut i: u32 = 0;
+		while i < util::LIMIT && z.norm_sqr() <= 2.0 {
+			z = z * z + c;
+			i += 1;
+		}
+
+		// converting iterations to hsv
+		let h = 255.0 * (i as f64) / (util::LIMIT as f64);
+		let s = 255.0;
+		let v = if i < util::LIMIT { 255.0 } else { 0.0 };
+
+		// hsv to rgb
+		*pixel = util::hsv_to_rgba(h, s, v);
+	}
+
+	Ok(())
+}
+
+fn render_sierpinski(buf: &mut util::RgbaBuffer, width: u32, height: u32) -> Result<(), image::ImageError> {
+	Ok(())
+}
+
+fn render_custom(buf: &mut util::RgbaBuffer, width: u32, height: u32) -> Result<(), image::ImageError> {
+	for (x, y, pixel) in buf.enumerate_pixels_mut() {
+		let cx = (y as f64) * (3.0 / width as f64) - 1.5;
+		let cy = (x as f64) * (3.0 / height as f64) - 1.5;
+
+		let c = num::Complex::new(cx, cy);
+		let mut z = num::Complex::new(cx, cx);
+
+		// escape time function
+		let mut i = 0;
+		while i < util::LIMIT && z.norm_sqr() <= 4.0 {
+			z = z * z + c;
+			i += 1;
+		}
+
+		let r = i as u8;
+		let g = i as u8;
+		let b = i as u8;
+		let a = 255 as u8;
+
+		*pixel = Rgba([r, g, b, a]);
+	}
+
+	Ok(())
 }

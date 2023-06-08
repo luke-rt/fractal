@@ -1,19 +1,14 @@
-use image::{
-	ImageBuffer,
-	Rgba,
-};
+use image::ImageBuffer;
 use rayon::prelude::*;
 
 use crate::fractals;
 
-pub fn write_to_img(filename: &str, dimensions: (u32, u32)) -> Result<(), image::ImageError> {
+pub fn write_to_img(filename: &str, dimensions: (u32, u32), fractal: &fractals::Fractal) -> Result<(), image::ImageError> {
 	let mut imgbuf = ImageBuffer::new(dimensions.0, dimensions.1);
 
-	for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
-        *pixel = fractals::render(fractals::Fractal::Mandelbrot, x, y);
-    }
+	fractals::render(&mut imgbuf, fractal, dimensions.0, dimensions.1)?;
 
-    imgbuf.save(filename)?;
+	imgbuf.save(filename)?;
 
 	Ok(())
 }
