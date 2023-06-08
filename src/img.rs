@@ -1,5 +1,4 @@
 use image::ImageBuffer;
-use rayon::prelude::*;
 
 use crate::fractals;
 

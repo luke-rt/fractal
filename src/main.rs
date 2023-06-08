@@ -10,5 +10,5 @@ fn main() {
 	let width = 1024;
 	let height = 1024;
 	let fractal = fractals::Fractal::Mandelbrot;
-	img::write_to_img("examples/test.png", (width, height), &fractal).expect("ERROR: Failed to write to image");
+	img::write_to_img("examples/mandelbrot.png", (width, height), &fractal).expect("ERROR: Failed to write to image");
 }

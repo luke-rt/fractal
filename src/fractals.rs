@@ -1,5 +1,4 @@
 use image::{
-	ImageBuffer,
 	Rgba,
 };
 
@@ -23,6 +22,7 @@ fn render_mandelbrot(buf: &mut util::RgbaBuffer, width: u32, height: u32) -> Res
 	for (x, y, pixel) in buf.enumerate_pixels_mut() {
 
 		// determines field/location of view
+		// the random constants are to optimize the location of the mandelbrot fractal in the image
 		let c = num::Complex::new(
 			(x as f64 * 3.0) / (width as f64) - 2.0,
 			(y as f64 * 3.0) / (height as f64) - 1.5,
@@ -36,14 +36,10 @@ fn render_mandelbrot(buf: &mut util::RgbaBuffer, width: u32, height: u32) -> Res
 			z = z * z + c;
 			i += 1;
 		}
-
-		// converting iterations to hsv
-		let h = 255.0 * (i as f64) / (util::LIMIT as f64);
-		let s = 255.0;
-		let v = if i < util::LIMIT { 255.0 } else { 0.0 };
+		let intensity = if i == util::LIMIT { 0 } else {(255.0 * (i as f64 / util::LIMIT as f64).sqrt()) as u8};
 
 		// hsv to rgb
-		*pixel = util::hsv_to_rgba(h, s, v);
+		*pixel = Rgba([intensity, intensity, intensity, 255]);
 	}
 
 	Ok(())
