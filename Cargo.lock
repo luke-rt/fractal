@@ -205,7 +205,6 @@ dependencies = [
  "image",
  "imageproc",
  "num",
- "rayon",
 ]
 
 [[package]]
